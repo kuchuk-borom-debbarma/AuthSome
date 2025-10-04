@@ -1,4 +1,6 @@
 package dev.kuku.auth_some.core.project.api.dto;
 
-public record ProjectUserToAdd() {
+import org.springframework.lang.Nullable;
+
+public record ProjectUserToAdd(String username, @Nullable String password) {
 }
