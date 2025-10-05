@@ -1,6 +1,6 @@
-package dev.kuku.auth_some.core.project.internal.model.entity;
+package dev.kuku.auth_some.core_service.project.internal.entity;
 
-import dev.kuku.auth_some.core.project.api.dto.IdentityType;
+import dev.kuku.auth_some.core_service.project.api.dto.IdentityType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

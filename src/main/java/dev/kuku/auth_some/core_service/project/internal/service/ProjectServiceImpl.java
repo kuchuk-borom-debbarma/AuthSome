@@ -1,8 +1,8 @@
-package dev.kuku.auth_some.core.project.internal.service;
+package dev.kuku.auth_some.core_service.project.internal.service;
 
-import dev.kuku.auth_some.core.project.api.ProjectService;
-import dev.kuku.auth_some.core.project.api.dto.IdentityType;
-import dev.kuku.auth_some.core.project.api.dto.ProjectUserToAdd;
+import dev.kuku.auth_some.core_service.project.api.ProjectService;
+import dev.kuku.auth_some.core_service.project.api.dto.IdentityType;
+import dev.kuku.auth_some.core_service.project.api.dto.ProjectUserToAdd;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

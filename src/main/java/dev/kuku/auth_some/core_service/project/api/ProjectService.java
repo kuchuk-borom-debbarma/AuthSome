@@ -1,7 +1,8 @@
-package dev.kuku.auth_some.core.project.api;
+package dev.kuku.auth_some.core_service.project.api;
 
-import dev.kuku.auth_some.core.project.api.dto.IdentityType;
-import dev.kuku.auth_some.core.project.api.dto.ProjectUserToAdd;
+import dev.kuku.auth_some.core_service.project.api.dto.IdentityType;
+import dev.kuku.auth_some.core_service.project.api.dto.ProjectToFetch;
+import dev.kuku.auth_some.core_service.project.api.dto.ProjectUserToAdd;
 
 import java.util.List;
 
@@ -101,6 +102,13 @@ public interface ProjectService {
      * @param token            token received when starting the identity verification process.
      */
     void verifyIdentityWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity, String otp, String token);
+
+    /**
+     * Get all the projects of a user
+     *
+     * @return
+     */
+    List<ProjectToFetch> getProjectOfUser(String userId, String cursor, int limit);
 
     //TODO Get based methods not defined yet. Will do as per requirements later down the line
 

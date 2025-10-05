@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @Setter
-public class AuthSomeRestResponseModel<T> {
+public class ResponseModel<T> {
     private T data;
     private String message;
 }

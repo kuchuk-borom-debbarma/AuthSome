@@ -1,16 +1,56 @@
 package dev.kuku.auth_some.cloud.controllers;
 
+import dev.kuku.auth_some.cloud.models.ResponseModel;
+import dev.kuku.auth_some.cloud.models.SignInRequest;
+import dev.kuku.auth_some.cloud.models.SignupStartRequest;
+import dev.kuku.auth_some.cloud.models.VerifySignupRequest;
+import dev.kuku.auth_some.core_service.authsome.api.AuthsomeService;
+import dev.kuku.auth_some.core_service.authsome.api.dto.SignInTokens;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class AuthSomeRestController {
+    private final AuthsomeService authsomeService;
+
     //1. Endpoint to signup with username, identity, password. Should send OTP to identity
+    @PostMapping("/signup-start")
+    public ResponseModel<String> startSignup(@RequestBody SignupStartRequest body) {
+        log.trace("signup-start {}", body);
+        /*
+        1. Receive: identity_type, identity, username, password
+        2. Generate OTP + save with user data
+        3. Generate token (subject = OTP record ID)
+        4. Return token + send OTP via notification
+         */
+        String token = authsomeService.startSignupProcess(body.identityType, body.identity, body.username, body.password);
+        return new ResponseModel<>(token, null);
+    }
+
     //2. Endpoint to complete signup with code
+    @PostMapping("/signup-verify")
+    public ResponseModel<Void> verifySignup(@RequestHeader("X-Verification-Token") String token, @RequestBody VerifySignupRequest body) {
+        log.trace("verifySignup");
+        /*
+        1. Get the id of the record from the token
+        2. Verify against passed otp
+        3. If matches store user info in database
+         */
+        authsomeService.completeSignupProcess(token, body.otp);
+        return new ResponseModel<>(null, null);
+    }
+
     //3. Endpoint to sign in and get back jwt tokens
+    @PostMapping("/signin")
+    public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) {
+        log.trace("signin {}", body);
+        SignInTokens tokens = authsomeService.signin(body.identityType, body.identity, body.password);
+        return new ResponseModel<>(tokens, null);
+    }
     //4. Endpoint to refresh token
     //5. Endpoint to start password reset (send OTP to identity)
     //6. Endpoint to complete password reset (with OTP and new password)

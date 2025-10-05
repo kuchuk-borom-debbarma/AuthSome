@@ -1,4 +1,4 @@
-package dev.kuku.auth_some.core.project.internal.model.entity;
+package dev.kuku.auth_some.core_service.project.internal.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
