@@ -14,5 +14,4 @@ public interface AccessControl {
     void addRolesForProjectUser(String projectId, String userId, List<String> roleIds);
 
     boolean canAccess(String projectId, String userId, String actionId, String resourceId);
-
 }

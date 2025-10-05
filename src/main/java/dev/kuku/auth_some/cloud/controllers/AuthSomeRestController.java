@@ -48,7 +48,7 @@ public class AuthSomeRestController {
     @PostMapping("/signin")
     public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) {
         log.trace("signin {}", body);
-        SignInTokens tokens = authsomeService.signin(body.identityType, body.identity, body.password);
+        SignInTokens tokens = authsomeService.signIn(body.identityType, body.identity, body.password);
         return new ResponseModel<>(tokens, null);
     }
     //4. Endpoint to refresh token
