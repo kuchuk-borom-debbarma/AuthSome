@@ -67,6 +67,12 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.kuchuk-borom-debbarma</groupId>
+            <artifactId>vfl-api-java</artifactId>
+            <version>release-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -97,5 +103,11 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
+        </repository>
+    </repositories>
 
 </project>

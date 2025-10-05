@@ -8,13 +8,13 @@ import java.util.List;
 /**
  * Project service that is responsible for handling all project related operations.
  * <p>
- * projects are isolated environments for authsome user to manage their own users and configurations at project level.
+ * projects are isolated environments for authsome authsome_user to manage their own users and configurations at project level.
  */
 public interface ProjectService {
     /**
-     * Create a project for an authsome user.
+     * Create a project for an authsome authsome_user.
      *
-     * @param authsomeUserId    id of the authsome user
+     * @param authsomeUserId    id of the authsome authsome_user
      * @param uniqueProjectName unique name of the project
      */
     void createProject(String authsomeUserId, String uniqueProjectName);
@@ -28,7 +28,7 @@ public interface ProjectService {
     void addUsersToProject(String projectId, List<ProjectUserToAdd> projectUsernames);
 
     /**
-     * Add (update if exists) password of a user without any verification.
+     * Add (update if exists) password of a authsome_user without any verification.
      *
      * @param projectId
      * @param projectUsername
@@ -37,12 +37,12 @@ public interface ProjectService {
     void upsertPasswordForProjectUser(String projectId, String projectUsername, String password);
 
     /**
-     * Update the password of a user if current password matches
+     * Update the password of a authsome_user if current password matches
      *
      * @param projectId       id of the project.
-     * @param projectUsername username of the project's user.
-     * @param currentPassword current password of the user (can be null. If null then will directly set the new password)
-     * @param newPassword     new password of the project user.
+     * @param projectUsername username of the project's authsome_user.
+     * @param currentPassword current password of the authsome_user (can be null. If null then will directly set the new password)
+     * @param newPassword     new password of the project authsome_user.
      */
     void updatePasswordForProjectUser(String projectId, String projectUsername, String currentPassword, String newPassword);
 
@@ -58,7 +58,7 @@ public interface ProjectService {
     String updatePasswordWithIdentityOtp(String projectId, String projectUsername, IdentityType identityType, String identity);
 
     /**
-     * Verify the OTP and set new password for the given project user.
+     * Verify the OTP and set new password for the given project authsome_user.
      *
      * @param projectId
      * @param projectUsername
@@ -69,10 +69,10 @@ public interface ProjectService {
     void verifyUpdatePasswordWithidentityOtp(String projectId, String projectUsername, String token, String otp, String newPassword);
 
     /**
-     * Add identity for a user in a project.
+     * Add identity for a authsome_user in a project.
      *
      * @param projectId        id of the project.
-     * @param projectUsername  username of the user in the project.
+     * @param projectUsername  username of the authsome_user in the project.
      * @param identityProvider identity provider type.
      * @param identity         identity value from the identity provider.
      * @param isVerified       if true the identity will be persisted as verified and will not require further verification.
@@ -80,10 +80,10 @@ public interface ProjectService {
     void addIdentityForUser(String projectId, String projectUsername, IdentityType identityProvider, String identity, boolean isVerified);
 
     /**
-     * Start identity verification process for a user in a project using OTP as verification method.
+     * Start identity verification process for a authsome_user in a project using OTP as verification method.
      *
      * @param projectId        id of the project.
-     * @param projectUsername  username of the user in the project.
+     * @param projectUsername  username of the authsome_user in the project.
      * @param identityProvider identity provider type.
      * @param identity         identity value from the identity provider.
      * @return token that must be passed during verification of the identity.
@@ -91,10 +91,10 @@ public interface ProjectService {
     String startidentityVerificationWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity);
 
     /**
-     * Verify identity for a user in a project using OTP as verification method. Will throw except if something went wrong.
+     * Verify identity for a authsome_user in a project using OTP as verification method. Will throw except if something went wrong.
      *
      * @param projectId        id of the project.
-     * @param projectUsername  username of the user in the project.
+     * @param projectUsername  username of the authsome_user in the project.
      * @param identityProvider identity provider type.
      * @param identity         identity value from the identity provider.
      * @param otp              one time password sent to the identity.
