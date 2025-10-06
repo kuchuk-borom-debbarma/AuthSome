@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.kuku</groupId>
-    <artifactId>auth_some</artifactId>
+    <artifactId>authsome</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>auth_some</name>
-    <description>auth_some</description>
+    <name>authsome</name>
+    <description>authentication and authorization system</description>
     <url/>
     <licenses>
         <license/>
