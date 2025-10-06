@@ -1,5 +1,6 @@
-package dev.kuku.authsome.config;
+package dev.kuku.authsome.infra.config;
 
+import dev.kuku.vfl.api.annotation.VFLAnnotation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,4 +12,8 @@ public class BeanConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public VFLAnnotation vflAnnotation() {
+        return VFLAnnotation.getInstance();
+    }
 }

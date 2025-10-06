@@ -6,9 +6,7 @@ import dev.kuku.authsome.cloud.models.SignupStartRequest;
 import dev.kuku.authsome.cloud.models.VerifySignupRequest;
 import dev.kuku.authsome.core_service.authsome.api.AuthsomeService;
 import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeIdentityAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeUsernameAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.OtpMismatchException;
+import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +36,7 @@ public class AuthSomeRestController {
 
     //2. Endpoint to complete signup with code
     @PostMapping("/signup-verify")
-    public ResponseModel<Void> verifySignup(@RequestHeader("X-Verification-Token") String token, @RequestBody VerifySignupRequest body) throws InvalidJwtToken, AuthsomeUsernameAlreadyInUse, OtpMismatchException, AuthsomeIdentityAlreadyInUse, ExpiredJwtToken {
+    public ResponseModel<Void> verifySignup(@RequestHeader("X-Verification-Token") String token, @RequestBody VerifySignupRequest body) throws InvalidJwtToken, AuthsomeUsernameAlreadyInUse, OtpMismatchException, AuthsomeIdentityAlreadyInUse, ExpiredJwtToken, OtpNotFoundInDatabase {
         log.trace("verifySignup");
         /*
         1. Get the id of the record from the token
@@ -51,7 +49,7 @@ public class AuthSomeRestController {
 
     //3. Endpoint to sign in and get back jwt tokens
     @PostMapping("/signin")
-    public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) {
+    public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) throws AuthsomeUserWithIdentityNotFound {
         log.trace("signin {}", body);
         SignInTokens tokens = authsomeService.signIn(body.identityType, body.identity, body.password);
         return new ResponseModel<>(tokens, null);

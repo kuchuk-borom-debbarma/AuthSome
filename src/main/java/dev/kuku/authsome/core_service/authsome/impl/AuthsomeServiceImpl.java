@@ -3,10 +3,7 @@ package dev.kuku.authsome.core_service.authsome.impl;
 import dev.kuku.authsome.core_service.authsome.api.AuthsomeService;
 import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserToFetch;
 import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeIdentityAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeUserWithIdentityNotFound;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeUsernameAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.OtpMismatchException;
+import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserEntity;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserIdentityEntity;
 import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
@@ -73,7 +70,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     @Override
     @Transactional
     @SubBlock
-    public void completeSignupProcess(String token, String otp) throws InvalidJwtToken, ExpiredJwtToken, OtpMismatchException, AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse {
+    public void completeSignupProcess(String token, String otp) throws InvalidJwtToken, ExpiredJwtToken, OtpMismatchException, AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, OtpNotFoundInDatabase {
         log.info("completeSignupProcess({}..., {}..)", token.substring(0, 5), otp.substring(0, 3));
         //Extract otp record id which is stored as subject, retrieve it, validate OTP
         TokenData tokenData = jwtService.extractToken(token);
@@ -84,7 +81,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         OtpToFetch fetchedOtp = otpService.getOtpById(tokenData.subject());
         if (fetchedOtp == null) {
             //TODO proper exception
-            throw new RuntimeException("OTP not found in database");
+            throw new OtpNotFoundInDatabase();
         }
         if (!fetchedOtp.otp.equals(otp)) {
             log.error("OTP {}... did not match {}...", otp.substring(0, 3), fetchedOtp.otp.substring(0, 3));
@@ -119,7 +116,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         }
         AuthsomeUserIdentityEntity userIdentityEntity = userIdentityOptional.get();
         String dbPwd = userIdentityEntity.user.hashedPassword;
-        if(!passwordEncoder.matches(password, dbPwd)){
+        if (!passwordEncoder.matches(password, dbPwd)) {
             log.error("password does not match");
         }
 

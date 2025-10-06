@@ -2,10 +2,7 @@ package dev.kuku.authsome.core_service.authsome.api;
 
 import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserToFetch;
 import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeIdentityAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeUserWithIdentityNotFound;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.AuthsomeUsernameAlreadyInUse;
-import dev.kuku.authsome.core_service.authsome.api.exceptions.OtpMismatchException;
+import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
@@ -29,7 +26,7 @@ public interface AuthsomeService {
      * @param token
      * @param otp
      */
-    void completeSignupProcess(String token, String otp) throws InvalidJwtToken, ExpiredJwtToken, OtpMismatchException, AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse;
+    void completeSignupProcess(String token, String otp) throws InvalidJwtToken, ExpiredJwtToken, OtpMismatchException, AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, OtpNotFoundInDatabase;
 
     /**
      * Sign in with credential
