@@ -1,0 +1,6 @@
+package dev.kuku.authsome.util_service.jwt.api.dto;
+
+import java.util.Map;
+
+public record TokenData(String subject, Map<String,Object> claims) {
+}
