@@ -22,7 +22,7 @@ public class AuthSomeRestController {
 
     //1. Endpoint to signup with username, identity, password. Should send OTP to identity
     @PostMapping("/signup-start")
-    public ResponseModel<String> startSignup(@RequestBody SignupStartRequest body) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse {
+    public ResponseModel<String> startSignup(@RequestBody SignupStartRequest body) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException {
         log.trace("signup-start {}", body);
         /*
         1. Receive: identity_type, identity, username, password

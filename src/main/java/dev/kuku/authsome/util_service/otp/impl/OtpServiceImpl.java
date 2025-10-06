@@ -20,6 +20,11 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
+    public String generateAlphabeticOtp(int otpLength) {
+        return "";
+    }
+
+    @Override
     public OtpToFetch saveOtpWithCustomData(String otp, Map<String, Object> customData, int expiresAt, TimeUnit timeUnit) {
         return null;
     }

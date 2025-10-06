@@ -2,6 +2,7 @@ package dev.kuku.authsome.core_service.project.internal.service;
 
 import dev.kuku.authsome.core_service.project.api.ProjectService;
 import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectToFetch;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectUserToAdd;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,5 +54,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void verifyIdentityWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity, String otp, String token) {
 
+    }
+
+    @Override
+    public List<ProjectToFetch> getProjectOfUser(String userId, String cursor, int limit) {
+        return List.of();
     }
 }
