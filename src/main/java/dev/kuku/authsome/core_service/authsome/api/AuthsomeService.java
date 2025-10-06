@@ -18,7 +18,7 @@ public interface AuthsomeService {
      * @param password
      * @return token that needs to be passed during verification
      */
-    String startSignupProcess(IdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse;
+    String startSignupProcess(IdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException;
 
     /**
      * Complete signup process by verifying that the token and the otp matches. If matches will save the user in the database

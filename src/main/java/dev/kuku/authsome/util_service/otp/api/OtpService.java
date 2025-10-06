@@ -11,9 +11,13 @@ public interface OtpService {
 
     String generateAlphaNumericOtp(int length, int minAlphabets, int minNumbers);
 
+    String generateAlphabeticOtp(int otpLength);
+
     OtpToFetch saveOtpWithCustomData(String otp, Map<String, Object> customData, int expiresAt, TimeUnit timeUnit);
 
-    @Nullable OtpToFetch getOtpById(String id);
+    @Nullable
+    OtpToFetch getOtpById(String id);
 
     void deleteById(String id);
+
 }

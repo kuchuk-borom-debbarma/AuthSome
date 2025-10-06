@@ -16,8 +16,10 @@ import dev.kuku.authsome.util_service.otp.api.OtpService;
 import dev.kuku.authsome.util_service.otp.api.dto.OtpToFetch;
 import dev.kuku.vfl.api.annotation.SubBlock;
 import dev.kuku.vfl.api.annotation.VFLAnnotation;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,33 +39,62 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     private final JwtService jwtService;
     private final OtpService otpService;
     private final NotifierService notifierService;
-    private final VFLAnnotation log = VFLAnnotation.getInstance();
+    private final VFLAnnotation log;
+
+    @Value("${authsome.user.signup.otp.type}")
+    private String otpType = "NUMERIC";
+
+    @Value("${authsome.user.signup.otp.length}")
+    private int otpLength = 5;
+
+    @Value("${authsome.user.signup.otp.minNumAlphanumeric}")
+    private int otpMinNumAlphanumeric = 2;
+
+    @Value("${authsome.user.signup.otp.minCharAlphanumeric}")
+    private int OtpMinCharAlphanumeric = 3;
+
+    @Value("${authsome.user.signup.otp.expiry}")
+    private int otpExpiry = 5;
+
+    @Value("${authsome.user.signup.otp.expiryUnit}")
+    private String otpExpiryUnitString = "MINUTES";
+    private TimeUnit OtpExpiryUnit;
+
+    @PostConstruct
+    private void initTimeUnit() {
+        OtpExpiryUnit = TimeUnit.valueOf(otpExpiryUnitString);
+    }
 
     @Override
     @Transactional
     @SubBlock
-    public String startSignupProcess(IdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse {
+    public String startSignupProcess(IdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException {
         log.info("startSignupProcess({}, {}, {}, {})", identityType, identity, username, password.substring(5));
 
         //TODO password basic requirements
         validateUsernameAvailability(username);
         validateIdentityAvailability(identityType, identity);
-
-        int otp = otpService.generateNumericOtp(5);
+        String otp = switch (otpType) {
+            case "NUMERIC" -> String.valueOf(otpService.generateNumericOtp(otpLength));
+            case "ALPHANUMERIC" ->
+                    otpService.generateAlphaNumericOtp(otpLength, OtpMinCharAlphanumeric, otpMinNumAlphanumeric);
+            case "ALPHABETIC" -> otpService.generateAlphabeticOtp(otpLength);
+            default -> throw new InvalidOtpTypeException(otpType);
+        };
         log.info("otp: {}", otp);
-        OtpToFetch saved = otpService.saveOtpWithCustomData(String.valueOf(otp),
+        OtpToFetch saved = otpService.saveOtpWithCustomData(otp,
                 Map.of(
                         "username", username,
                         "identityType", identityType,
                         "identityValue", identity,
                         "password", passwordEncoder.encode(password)
                 ),
-                5,
-                TimeUnit.MINUTES);
+                otpExpiry,
+                OtpExpiryUnit);
         log.info("saved: {}", saved);
-        String token = jwtService.generateToken(saved.id, null, 5, TimeUnit.MINUTES);
+        String token = jwtService.generateToken(saved.id, null, otpExpiry, OtpExpiryUnit);
         log.info("token: {}...", token.substring(0, 5));
-        notifierService.sendNotificationToIdentity(identityType, identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + 5 + " " + TimeUnit.MINUTES.name());
+        notifierService.sendNotificationToIdentity(identityType, identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + otpExpiry + " " + OtpExpiryUnit.name());
         return token;
     }
 
