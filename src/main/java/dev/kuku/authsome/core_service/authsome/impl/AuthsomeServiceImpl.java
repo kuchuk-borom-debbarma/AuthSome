@@ -1,18 +1,19 @@
 package dev.kuku.authsome.core_service.authsome.impl;
 
 import dev.kuku.authsome.core_service.authsome.api.AuthsomeService;
+import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserIdentityType;
 import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserToFetch;
 import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
 import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserEntity;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserIdentityEntity;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserRefreshTokenEntity;
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
 import dev.kuku.authsome.util_service.jwt.api.JwtService;
 import dev.kuku.authsome.util_service.jwt.api.dto.TokenData;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
 import dev.kuku.authsome.util_service.notifier.api.NotifierService;
+import dev.kuku.authsome.util_service.notifier.api.dto.NotifierIdentityType;
 import dev.kuku.authsome.util_service.otp.api.OtpService;
 import dev.kuku.authsome.util_service.otp.api.dto.OtpToFetch;
 import dev.kuku.vfl.api.annotation.SubBlock;
@@ -80,7 +81,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     @Override
     @Transactional
     @SubBlock
-    public String startSignupProcess(IdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException {
+    public String startSignupProcess(AuthsomeUserIdentityType identityType, String identity, String username, String password) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException {
         log.info("startSignupProcess({}, {}, {}, {})", identityType, identity, username, password.substring(5));
 
         //TODO password basic requirements
@@ -97,7 +98,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         OtpToFetch saved = otpService.saveOtpWithCustomData(otp,
                 Map.of(
                         "username", username,
-                        "identityType", identityType,
+                        "projectUserIdentityType", identityType,
                         "identityValue", identity,
                         "password", passwordEncoder.encode(password)
                 ),
@@ -106,7 +107,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         log.info("saved: {}", saved);
         String token = jwtService.generateToken(saved.id, null, otpExpiry, otpExpiryUnit);
         log.info("token: {}...", token.substring(0, 5));
-        notifierService.sendNotificationToIdentity(identityType, identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + otpExpiry + " " + otpExpiryUnit.name());
+        notifierService.sendNotificationToIdentity(NotifierIdentityType.valueOf(identityType.name()), identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + otpExpiry + " " + otpExpiryUnit.name());
         return token;
     }
 
@@ -133,7 +134,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         String username = fetchedOtp.customData.get("username").toString();
         String password = fetchedOtp.customData.get("password").toString();
         String identity = fetchedOtp.customData.get("identityValue").toString();
-        IdentityType identityType = IdentityType.valueOf(fetchedOtp.customData.get("identityType").toString());
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.valueOf(fetchedOtp.customData.get("projectUserIdentityType").toString());
 
         validateUsernameAvailability(username);
         validateIdentityAvailability(identityType, identity);
@@ -147,7 +148,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     @Override
     @SubBlock
     @Transactional
-    public SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch, MaxActiveSessionsReached {
+    public SignInTokens signIn(AuthsomeUserIdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch, MaxActiveSessionsReached {
         log.info("signIn({}, {}, {}...)", identityType, identityValue, password.substring(2, 6));
         //1. Find the user from identity
         var filters = Example.of(new AuthsomeUserIdentityEntity(
@@ -254,7 +255,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
      * @throws AuthsomeIdentityAlreadyInUse if the identity already exists
      */
     @SubBlock
-    private void validateIdentityAvailability(IdentityType identityType, String identity) throws AuthsomeIdentityAlreadyInUse {
+    private void validateIdentityAvailability(AuthsomeUserIdentityType identityType, String identity) throws AuthsomeIdentityAlreadyInUse {
         var identityFilter = Example.of(new AuthsomeUserIdentityEntity(null, null, identityType, identity, null, null));
         if (identityJpaRepo.exists(identityFilter)) {
             log.error("Identity already in use {} -> {}", identityType, identity);

@@ -1,17 +1,19 @@
 package dev.kuku.authsome.core_services;
 
+import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserIdentityType;
 import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.authsome.impl.AuthsomeServiceImpl;
 import dev.kuku.authsome.core_service.authsome.impl.AuthsomeUserIdentityJpaRepo;
 import dev.kuku.authsome.core_service.authsome.impl.AuthsomeUserJpaRepo;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserEntity;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserIdentityEntity;
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityType;
 import dev.kuku.authsome.util_service.jwt.api.JwtService;
 import dev.kuku.authsome.util_service.jwt.api.dto.TokenData;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
 import dev.kuku.authsome.util_service.notifier.api.NotifierService;
+import dev.kuku.authsome.util_service.notifier.api.dto.NotifierIdentityType;
 import dev.kuku.authsome.util_service.otp.api.OtpService;
 import dev.kuku.authsome.util_service.otp.api.dto.OtpToFetch;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,15 +60,17 @@ class AuthsomeServiceImplSignupTest {
 
     @BeforeEach
     void setUp() {
-        // Set up configuration values using ReflectionTestUtils
         ReflectionTestUtils.setField(authsomeService, "otpType", "NUMERIC");
         ReflectionTestUtils.setField(authsomeService, "otpLength", 6);
         ReflectionTestUtils.setField(authsomeService, "otpMinNumAlphanumeric", 2);
-        ReflectionTestUtils.setField(authsomeService, "OtpMinCharAlphanumeric", 3);
+        ReflectionTestUtils.setField(authsomeService, "OtpMinCharAlphanumeric", 3); // <-- Correct
         ReflectionTestUtils.setField(authsomeService, "otpExpiry", 5);
         ReflectionTestUtils.setField(authsomeService, "otpExpiryUnitString", "MINUTES");
-        ReflectionTestUtils.setField(authsomeService, "OtpExpiryUnit", TimeUnit.MINUTES);
+        ReflectionTestUtils.setField(authsomeService, "otpExpiryUnit", TimeUnit.MINUTES);
+        ReflectionTestUtils.setField(authsomeService, "log", mock(dev.kuku.vfl.api.annotation.VFLAnnotation.class));
     }
+
+
 
     @Test
     void startSignupProcess_Success_NumericOtp() throws AuthsomeUsernameAlreadyInUse, InvalidOtpTypeException, AuthsomeIdentityAlreadyInUse {
@@ -74,7 +78,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String password = "password123";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
         int generatedOtp = 123456;
         String otpId = "otp-id-123";
         String token = "jwt-token-123";
@@ -99,12 +103,12 @@ class AuthsomeServiceImplSignupTest {
         verify(otpService).generateNumericOtp(6);
         verify(otpService).saveOtpWithCustomData(eq(String.valueOf(generatedOtp)), argThat(map ->
                 map.get("username").equals(username) &&
-                map.get("identityType").equals(identityType) &&
+                map.get("projectUserIdentityType").equals(identityType) &&
                 map.get("identityValue").equals(identity) &&
                 map.get("password").equals("hashed-password")
         ), eq(5), eq(TimeUnit.MINUTES));
         verify(notifierService).sendNotificationToIdentity(
-                eq(identityType),
+                eq(NotifierIdentityType.valueOf(identityType.name())),
                 eq(identity),
                 anyString(),
                 contains(String.valueOf(generatedOtp))
@@ -118,7 +122,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String password = "password123";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
         String generatedOtp = "AB12CD";
         String otpId = "otp-id-123";
         String token = "jwt-token-123";
@@ -148,7 +152,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String password = "password123";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
         String generatedOtp = "ABCDEF";
         String otpId = "otp-id-123";
         String token = "jwt-token-123";
@@ -176,7 +180,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "existinguser";
         String password = "password123";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
 
         when(userJpaRepo.exists(any(Example.class))).thenReturn(true);
 
@@ -195,7 +199,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String password = "password123";
         String identity = "existing@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
 
         when(userJpaRepo.exists(any(Example.class))).thenReturn(false);
         when(identityJpaRepo.exists(any(Example.class))).thenReturn(true);
@@ -216,7 +220,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String password = "password123";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        AuthsomeUserIdentityType identityType = AuthsomeUserIdentityType.EMAIL;
 
         when(userJpaRepo.exists(any(Example.class))).thenReturn(false);
         when(identityJpaRepo.exists(any(Example.class))).thenReturn(false);
@@ -236,7 +240,7 @@ class AuthsomeServiceImplSignupTest {
         String username = "testuser";
         String hashedPassword = "hashed-password";
         String identity = "test@example.com";
-        IdentityType identityType = IdentityType.EMAIL;
+        ProjectUserIdentityType projectUserIdentityType = ProjectUserIdentityType.EMAIL;
         String userId = "user-id-123";
 
         TokenData tokenData = new TokenData(otpId, null);
@@ -247,7 +251,7 @@ class AuthsomeServiceImplSignupTest {
                         "username", username,
                         "password", hashedPassword,
                         "identityValue", identity,
-                        "identityType", identityType.name()
+                        "projectUserIdentityType", projectUserIdentityType.name()
                 )
         );
         AuthsomeUserEntity savedUser = new AuthsomeUserEntity(
@@ -276,7 +280,7 @@ class AuthsomeServiceImplSignupTest {
         ));
         verify(identityJpaRepo).save(argThat(userIdentity ->
                 userIdentity.user.equals(savedUser) &&
-                userIdentity.identityType.equals(identityType) &&
+                userIdentity.identityType.equals(projectUserIdentityType) &&
                 userIdentity.identity.equals(identity)
         ));
         verify(otpService).deleteById(otpId);
@@ -388,7 +392,7 @@ class AuthsomeServiceImplSignupTest {
                         "username", username,
                         "password", "hashed-password",
                         "identityValue", "test@example.com",
-                        "identityType", IdentityType.EMAIL.name()
+                        "projectUserIdentityType", ProjectUserIdentityType.EMAIL.name()
                 )
         );
 
