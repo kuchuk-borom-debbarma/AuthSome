@@ -38,7 +38,7 @@ public interface AuthsomeService {
      * @param password
      * @return access token
      */
-    SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch;
+    SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch, MaxActiveSessionsReached;
 
     /**
      * Generate new pair of tokens using refreshToken.

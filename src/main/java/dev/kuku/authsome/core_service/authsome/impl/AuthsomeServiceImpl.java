@@ -68,6 +68,8 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     @Value("${authsome.user.signin.jwt_expiry_unit}")
     private String authsomeSignInJwtExpiryUnitRaw = "MINUTES";
     private TimeUnit authsomeSignInJwtExpiryUnit = TimeUnit.MINUTES;
+    @Value("${authsome.user.max_sessions}")
+    private int maxActiveSession = 3;
 
     @PostConstruct
     private void initTimeUnit() {
@@ -145,9 +147,9 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     @Override
     @SubBlock
     @Transactional
-    public SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch {
-        //TODO max refresh token per user
+    public SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch, MaxActiveSessionsReached {
         log.info("signIn({}, {}, {}...)", identityType, identityValue, password.substring(2, 6));
+        //1. Find the user from identity
         var filters = Example.of(new AuthsomeUserIdentityEntity(
                 null, null, identityType, identityValue, null, null
         ));
@@ -156,14 +158,23 @@ public class AuthsomeServiceImpl implements AuthsomeService {
             log.error("user with identity not found");
             throw new AuthsomeUserWithIdentityNotFound(identityType, identityValue);
         }
-        AuthsomeUserIdentityEntity userIdentityEntity = userIdentityOptional.get();
-        AuthsomeUserEntity authsomeUser = userIdentityEntity.user;
-        if (!passwordEncoder.matches(password, authsomeUser.hashedPassword)) {
+        AuthsomeUserIdentityEntity userIdentity = userIdentityOptional.get();
+        AuthsomeUserEntity user = userIdentity.user;
+        //Check if maxSessions reached
+        var userFilterRule = new AuthsomeUserEntity();
+        userFilterRule.id = user.id;
+        var refreshFilterRule = new AuthsomeUserRefreshTokenEntity();
+        refreshFilterRule.user = userFilterRule;
+        long count = refreshTokenJpaRepo.count(Example.of(refreshFilterRule));
+        if (count >= maxActiveSession) {
+            throw new MaxActiveSessionsReached(user.id, maxActiveSession);
+        }
+        if (!passwordEncoder.matches(password, user.hashedPassword)) {
             log.error("password does not match");
             throw new AuthsomePasswordMismatch(identityType, identityValue);
         }
-        String accessToken = generateUserAccessToken(authsomeUser.id);
-        AuthsomeUserRefreshTokenEntity savedRefreshToken = generateUserRefreshToken(authsomeUser.id, null);
+        String accessToken = generateUserAccessToken(user.id);
+        AuthsomeUserRefreshTokenEntity savedRefreshToken = generateUserRefreshToken(user.id, null);
         String refreshToken = savedRefreshToken.id;
         return new SignInTokens(accessToken, refreshToken);
     }
@@ -266,7 +277,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
      *
      * @param userId   id of the user to generate for
      * @param metadata metadata to store
-     * @return
+     * @return record saved in database
      */
     @SubBlock
     private AuthsomeUserRefreshTokenEntity generateUserRefreshToken(String userId, Map<String, Object> metadata) {

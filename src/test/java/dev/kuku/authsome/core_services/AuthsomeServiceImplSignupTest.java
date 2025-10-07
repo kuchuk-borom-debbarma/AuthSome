@@ -1,6 +1,5 @@
 package dev.kuku.authsome.core_services;
 
-import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
 import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.authsome.impl.AuthsomeServiceImpl;
 import dev.kuku.authsome.core_service.authsome.impl.AuthsomeUserIdentityJpaRepo;
@@ -27,7 +26,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
