@@ -190,6 +190,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
             throw new InvalidRefreshToken(refreshToken);
         }
         AuthsomeUserEntity authsomeUser = currentRt.user;
+        //TODO ensure it has NOT expired. CRON job might not have triggred yet and missed it
         //2. Generate access token for the user
         String accessToken = generateUserAccessToken(authsomeUser.id);
         //3. Generate new refresh token
