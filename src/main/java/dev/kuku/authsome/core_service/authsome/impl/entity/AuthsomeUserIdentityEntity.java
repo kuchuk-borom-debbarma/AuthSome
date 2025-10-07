@@ -1,6 +1,6 @@
 package dev.kuku.authsome.core_service.authsome.impl.entity;
 
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserIdentityType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -29,7 +29,7 @@ public class AuthsomeUserIdentityEntity {
 
     @Column(name = "identity_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    public IdentityType identityType;
+    public AuthsomeUserIdentityType identityType;
 
     @Column(nullable = false, name = "identity")
     public String identity;

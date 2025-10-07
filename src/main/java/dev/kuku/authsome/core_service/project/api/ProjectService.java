@@ -1,6 +1,6 @@
 package dev.kuku.authsome.core_service.project.api;
 
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityType;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectToFetch;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectUserToAdd;
 
@@ -52,11 +52,11 @@ public interface ProjectService {
      *
      * @param projectId
      * @param projectUsername
-     * @param identityType
+     * @param projectUserIdentityType
      * @param identity
      * @return token that must be sent along with the OTP during verification process.
      */
-    String updatePasswordWithIdentityOtp(String projectId, String projectUsername, IdentityType identityType, String identity);
+    String updatePasswordWithIdentityOtp(String projectId, String projectUsername, ProjectUserIdentityType projectUserIdentityType, String identity);
 
     /**
      * Verify the OTP and set new password for the given project authsome_user.
@@ -78,7 +78,7 @@ public interface ProjectService {
      * @param identity         identity value from the identity provider.
      * @param isVerified       if true the identity will be persisted as verified and will not require further verification.
      */
-    void addIdentityForUser(String projectId, String projectUsername, IdentityType identityProvider, String identity, boolean isVerified);
+    void addIdentityForUser(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, boolean isVerified);
 
     /**
      * Start identity verification process for a authsome_user in a project using OTP as verification method.
@@ -89,7 +89,7 @@ public interface ProjectService {
      * @param identity         identity value from the identity provider.
      * @return token that must be passed during verification of the identity.
      */
-    String startidentityVerificationWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity);
+    String startidentityVerificationWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity);
 
     /**
      * Verify identity for a authsome_user in a project using OTP as verification method. Will throw except if something went wrong.
@@ -101,7 +101,7 @@ public interface ProjectService {
      * @param otp              one time password sent to the identity.
      * @param token            token received when starting the identity verification process.
      */
-    void verifyIdentityWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity, String otp, String token);
+    void verifyIdentityWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, String otp, String token);
 
     /**
      * Get all the projects of a user

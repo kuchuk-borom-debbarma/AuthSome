@@ -1,7 +1,7 @@
 package dev.kuku.authsome.core_service.project.internal.service;
 
 import dev.kuku.authsome.core_service.project.api.ProjectService;
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityType;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectToFetch;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectUserToAdd;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public String updatePasswordWithIdentityOtp(String projectId, String projectUsername, IdentityType identityType, String identity) {
+    public String updatePasswordWithIdentityOtp(String projectId, String projectUsername, ProjectUserIdentityType projectUserIdentityType, String identity) {
         return "";
     }
 
@@ -42,17 +42,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void addIdentityForUser(String projectId, String projectUsername, IdentityType identityProvider, String identity, boolean isVerified) {
+    public void addIdentityForUser(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, boolean isVerified) {
 
     }
 
     @Override
-    public String startidentityVerificationWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity) {
+    public String startidentityVerificationWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity) {
         return "";
     }
 
     @Override
-    public void verifyIdentityWithOtp(String projectId, String projectUsername, IdentityType identityProvider, String identity, String otp, String token) {
+    public void verifyIdentityWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, String otp, String token) {
 
     }
 

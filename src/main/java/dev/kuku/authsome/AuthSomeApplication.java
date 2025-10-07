@@ -16,3 +16,4 @@ public class AuthSomeApplication {
 //NOTE : Hard limit for custom attributes and data that user can put or else they may put huge data
 //NOTE: Max session per project
 //NOTE: BIG!!!!!! Rules engine for complex project
+//NOTE: Asymmetric JWT for project config

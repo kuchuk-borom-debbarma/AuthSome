@@ -1,12 +1,12 @@
 package dev.kuku.authsome.cloud.models;
 
-import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
+import dev.kuku.authsome.core_service.authsome.api.dto.AuthsomeUserIdentityType;
 import lombok.ToString;
 
 @ToString
 public class SignupStartRequest {
     public String identity;
-    public IdentityType identityType;
+    public AuthsomeUserIdentityType identityType;
     public String username;
     public String password;
 }
