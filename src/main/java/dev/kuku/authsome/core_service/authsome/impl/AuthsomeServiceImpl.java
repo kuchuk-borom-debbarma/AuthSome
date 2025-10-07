@@ -121,7 +121,6 @@ public class AuthsomeServiceImpl implements AuthsomeService {
         }
         OtpToFetch fetchedOtp = otpService.getOtpById(tokenData.subject());
         if (fetchedOtp == null) {
-            //TODO proper exception
             throw new OtpNotFoundInDatabase();
         }
         if (!fetchedOtp.otp.equals(otp)) {
@@ -163,27 +162,46 @@ public class AuthsomeServiceImpl implements AuthsomeService {
             log.error("password does not match");
             throw new AuthsomePasswordMismatch(identityType, identityValue);
         }
-        String accessToken = jwtService.generateToken(authsomeUser.id,
-                Map.of(
-                        "type", "authsome-user"
-                ),
-                authsomeSignInJwtExpiry,
-                authsomeSignInJwtExpiryUnit);
-        AuthsomeUserRefreshTokenEntity savedRefreshToken = refreshTokenJpaRepo.save(new AuthsomeUserRefreshTokenEntity(
-                null,
-                authsomeUser,
-                Instant.now().toEpochMilli(),
-                Instant.now().toEpochMilli(),
-                authsomeSignInJwtExpiry,
-                authsomeSignInJwtExpiryUnit,
-                null //TODO store client data in future
-        ));
+        String accessToken = generateUserAccessToken(authsomeUser.id);
+        AuthsomeUserRefreshTokenEntity savedRefreshToken = generateUserRefreshToken(authsomeUser.id, null);
         String refreshToken = savedRefreshToken.id;
         return new SignInTokens(accessToken, refreshToken);
     }
 
-    //TODO logout from all device
-    //TODO logout refreshtoken
+    @Override
+    @SubBlock
+    public SignInTokens refreshToken(String refreshToken) throws InvalidRefreshToken {
+        log.info("refreshToken({}...)", refreshToken.substring(0, 5));
+        //1. Fetch the refresh token
+        AuthsomeUserRefreshTokenEntity currentRt = refreshTokenJpaRepo.findById(refreshToken).orElse(null);
+        if (currentRt == null) {
+            throw new InvalidRefreshToken(refreshToken);
+        }
+        AuthsomeUserEntity authsomeUser = currentRt.user;
+        //2. Generate access token for the user
+        String accessToken = generateUserAccessToken(authsomeUser.id);
+        //3. Generate new refresh token
+        AuthsomeUserRefreshTokenEntity newRefreshToken = generateUserRefreshToken(authsomeUser.id, null);
+        //4. Delete current RT
+        refreshTokenJpaRepo.deleteById(currentRt.id);
+        return new SignInTokens(accessToken, newRefreshToken.id);
+    }
+
+    @Override
+    @SubBlock
+    @Transactional
+    public void revokeRefreshToken(String refreshToken) {
+        log.info("revokeRefreshToken({}...)", refreshToken.substring(0, 5));
+        refreshTokenJpaRepo.deleteById(refreshToken);
+    }
+
+    @Override
+    @SubBlock
+    @Transactional
+    public void revokeAllRefreshTokenOfUser(String userId) {
+        log.info("revokeAllRefreshTokenOfUser({}...)", userId);
+        refreshTokenJpaRepo.deleteAllByUserId(userId);
+    }
 
     @SubBlock
     @Override
@@ -231,5 +249,36 @@ public class AuthsomeServiceImpl implements AuthsomeService {
             log.error("Identity already in use {} -> {}", identityType, identity);
             throw new AuthsomeIdentityAlreadyInUse(identityType, identity);
         }
+    }
+
+    @SubBlock
+    private String generateUserAccessToken(String userId) {
+        return jwtService.generateToken(userId,
+                Map.of(
+                        "type", "authsome-user"
+                ),
+                authsomeSignInJwtExpiry,
+                authsomeSignInJwtExpiryUnit);
+    }
+
+    /**
+     * Save new refresh token for the user and metadata and return it
+     *
+     * @param userId   id of the user to generate for
+     * @param metadata metadata to store
+     * @return
+     */
+    @SubBlock
+    private AuthsomeUserRefreshTokenEntity generateUserRefreshToken(String userId, Map<String, Object> metadata) {
+        log.info("generateUserRefreshToken({})", userId);
+        return refreshTokenJpaRepo.save(new AuthsomeUserRefreshTokenEntity(
+                null,
+                new AuthsomeUserEntity(userId, null, null, null, null),
+                Instant.now().toEpochMilli(),
+                Instant.now().toEpochMilli(),
+                authsomeSignInJwtExpiry,
+                authsomeSignInJwtExpiryUnit,
+                metadata
+        ));
     }
 }
