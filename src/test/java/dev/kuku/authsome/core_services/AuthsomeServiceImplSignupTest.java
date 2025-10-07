@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthsomeServiceImplTest {
+class AuthsomeServiceImplSignupTest {
 
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
@@ -403,78 +403,5 @@ class AuthsomeServiceImplTest {
                 authsomeService.completeSignupProcess(token, otp)
         );
         verify(userJpaRepo, never()).save(any());
-    }
-
-    @Test
-    void signIn_Success() throws AuthsomeUserWithIdentityNotFound {
-        // Arrange
-        String identity = "test@example.com";
-        String password = "password123";
-        String hashedPassword = "$2a$10$hashedpassword";
-        IdentityType identityType = IdentityType.EMAIL;
-        String userId = "user-id-123";
-
-        AuthsomeUserEntity user = new AuthsomeUserEntity(
-                userId, "testuser", hashedPassword, Instant.now().toEpochMilli(), Instant.now().toEpochMilli()
-        );
-        AuthsomeUserIdentityEntity userIdentity = new AuthsomeUserIdentityEntity(
-                "identity-id", user, identityType, identity, Instant.now().toEpochMilli(), Instant.now().toEpochMilli()
-        );
-
-        when(identityJpaRepo.findOne(any(Example.class))).thenReturn(Optional.of(userIdentity));
-        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
-
-        // Act
-        @SuppressWarnings("unused") SignInTokens result = authsomeService.signIn(identityType, identity, password);
-
-        // Assert
-        verify(identityJpaRepo).findOne(any(Example.class));
-        verify(passwordEncoder).matches(password, hashedPassword);
-        // Note: Current implementation returns null, so result will be null
-        // This test verifies the flow executes without exceptions
-    }
-
-    @Test
-    void signIn_UserNotFound_ThrowsException() {
-        // Arrange
-        String identity = "nonexistent@example.com";
-        String password = "password123";
-        IdentityType identityType = IdentityType.EMAIL;
-
-        when(identityJpaRepo.findOne(any(Example.class))).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(AuthsomeUserWithIdentityNotFound.class, () ->
-                authsomeService.signIn(identityType, identity, password)
-        );
-        verify(identityJpaRepo).findOne(any(Example.class));
-        verify(passwordEncoder, never()).matches(anyString(), anyString());
-    }
-
-    @Test
-    void signIn_IncorrectPassword_DoesNotThrowException() throws AuthsomeUserWithIdentityNotFound {
-        // Arrange
-        String identity = "test@example.com";
-        String password = "wrongpassword";
-        String hashedPassword = "$2a$10$hashedpassword";
-        IdentityType identityType = IdentityType.EMAIL;
-
-        AuthsomeUserEntity user = new AuthsomeUserEntity(
-                "user-id", "testuser", hashedPassword, Instant.now().toEpochMilli(), Instant.now().toEpochMilli()
-        );
-        AuthsomeUserIdentityEntity userIdentity = new AuthsomeUserIdentityEntity(
-                "identity-id", user, identityType, identity, Instant.now().toEpochMilli(), Instant.now().toEpochMilli()
-        );
-
-        when(identityJpaRepo.findOne(any(Example.class))).thenReturn(Optional.of(userIdentity));
-        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(false);
-
-        // Act
-        @SuppressWarnings("unused") SignInTokens result = authsomeService.signIn(identityType, identity, password);
-
-        // Assert
-        verify(passwordEncoder).matches(password, hashedPassword);
-        // Note: Current implementation logs error but doesn't throw exception
-        // This verifies the behavior matches the implementation
     }
 }

@@ -6,6 +6,7 @@ import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
+import org.apache.coyote.BadRequestException;
 import org.springframework.lang.Nullable;
 
 public interface AuthsomeService {
@@ -36,7 +37,7 @@ public interface AuthsomeService {
      * @param password
      * @return access token
      */
-    SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound;
+    SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch;
 
     /**
      * Get the user by id and/or username
@@ -44,6 +45,6 @@ public interface AuthsomeService {
      * @param username
      * @return the fetched user
      */
-    @Nullable AuthsomeUserToFetch getAuthsomeUser(@Nullable String id,@Nullable String username);
+    @Nullable AuthsomeUserToFetch getAuthsomeUser(@Nullable String id,@Nullable String username) throws BadRequestException;
 
 }

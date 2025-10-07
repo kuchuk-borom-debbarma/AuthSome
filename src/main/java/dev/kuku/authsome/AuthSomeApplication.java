@@ -10,3 +10,4 @@ public class AuthSomeApplication {
         SpringApplication.run(AuthSomeApplication.class, args);
     }
 }
+//TODO CRON job for cleaning up refresh token

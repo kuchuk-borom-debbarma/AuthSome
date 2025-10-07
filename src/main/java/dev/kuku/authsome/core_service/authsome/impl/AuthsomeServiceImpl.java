@@ -6,6 +6,7 @@ import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
 import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserEntity;
 import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserIdentityEntity;
+import dev.kuku.authsome.core_service.authsome.impl.entity.AuthsomeUserRefreshTokenEntity;
 import dev.kuku.authsome.core_service.project.api.dto.IdentityType;
 import dev.kuku.authsome.util_service.jwt.api.JwtService;
 import dev.kuku.authsome.util_service.jwt.api.dto.TokenData;
@@ -19,6 +20,7 @@ import dev.kuku.vfl.api.annotation.VFLAnnotation;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,6 +38,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthsomeUserJpaRepo userJpaRepo;
     private final AuthsomeUserIdentityJpaRepo identityJpaRepo;
+    private final AuthsomeRefreshTokenJpaRepo refreshTokenJpaRepo;
     private final JwtService jwtService;
     private final OtpService otpService;
     private final NotifierService notifierService;
@@ -58,11 +61,18 @@ public class AuthsomeServiceImpl implements AuthsomeService {
 
     @Value("${authsome.user.signup.otp.expiryUnit}")
     private String otpExpiryUnitString = "MINUTES";
-    private TimeUnit OtpExpiryUnit;
+    private TimeUnit otpExpiryUnit;
+
+    @Value("${authsome.user.signin.jwt_expiry}")
+    private int authsomeSignInJwtExpiry = 5;
+    @Value("${authsome.user.signin.jwt_expiry_unit}")
+    private String authsomeSignInJwtExpiryUnitRaw = "MINUTES";
+    private TimeUnit authsomeSignInJwtExpiryUnit = TimeUnit.MINUTES;
 
     @PostConstruct
     private void initTimeUnit() {
-        OtpExpiryUnit = TimeUnit.valueOf(otpExpiryUnitString);
+        otpExpiryUnit = TimeUnit.valueOf(otpExpiryUnitString);
+        authsomeSignInJwtExpiryUnit = TimeUnit.valueOf(authsomeSignInJwtExpiryUnitRaw);
     }
 
     @Override
@@ -90,11 +100,11 @@ public class AuthsomeServiceImpl implements AuthsomeService {
                         "password", passwordEncoder.encode(password)
                 ),
                 otpExpiry,
-                OtpExpiryUnit);
+                otpExpiryUnit);
         log.info("saved: {}", saved);
-        String token = jwtService.generateToken(saved.id, null, otpExpiry, OtpExpiryUnit);
+        String token = jwtService.generateToken(saved.id, null, otpExpiry, otpExpiryUnit);
         log.info("token: {}...", token.substring(0, 5));
-        notifierService.sendNotificationToIdentity(identityType, identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + otpExpiry + " " + OtpExpiryUnit.name());
+        notifierService.sendNotificationToIdentity(identityType, identity, "Authsome : OTP for signing up", "Your OTP for signing up for Authsome is " + otp + ". Expires in " + otpExpiry + " " + otpExpiryUnit.name());
         return token;
     }
 
@@ -135,7 +145,9 @@ public class AuthsomeServiceImpl implements AuthsomeService {
 
     @Override
     @SubBlock
-    public SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound {
+    @Transactional
+    public SignInTokens signIn(IdentityType identityType, String identityValue, String password) throws AuthsomeUserWithIdentityNotFound, AuthsomePasswordMismatch {
+        //TODO max refresh token per user
         log.info("signIn({}, {}, {}...)", identityType, identityValue, password.substring(2, 6));
         var filters = Example.of(new AuthsomeUserIdentityEntity(
                 null, null, identityType, identityValue, null, null
@@ -146,17 +158,48 @@ public class AuthsomeServiceImpl implements AuthsomeService {
             throw new AuthsomeUserWithIdentityNotFound(identityType, identityValue);
         }
         AuthsomeUserIdentityEntity userIdentityEntity = userIdentityOptional.get();
-        String dbPwd = userIdentityEntity.user.hashedPassword;
-        if (!passwordEncoder.matches(password, dbPwd)) {
+        AuthsomeUserEntity authsomeUser = userIdentityEntity.user;
+        if (!passwordEncoder.matches(password, authsomeUser.hashedPassword)) {
             log.error("password does not match");
+            throw new AuthsomePasswordMismatch(identityType, identityValue);
         }
-
-        return null;
+        String accessToken = jwtService.generateToken(authsomeUser.id,
+                Map.of(
+                        "type", "authsome-user"
+                ),
+                authsomeSignInJwtExpiry,
+                authsomeSignInJwtExpiryUnit);
+        AuthsomeUserRefreshTokenEntity savedRefreshToken = refreshTokenJpaRepo.save(new AuthsomeUserRefreshTokenEntity(
+                null,
+                authsomeUser,
+                Instant.now().toEpochMilli(),
+                Instant.now().toEpochMilli(),
+                authsomeSignInJwtExpiry,
+                authsomeSignInJwtExpiryUnit,
+                null //TODO store client data in future
+        ));
+        String refreshToken = savedRefreshToken.id;
+        return new SignInTokens(accessToken, refreshToken);
     }
 
+    //TODO logout from all device
+    //TODO logout refreshtoken
+
+    @SubBlock
     @Override
-    public AuthsomeUserToFetch getAuthsomeUser(String id, String username) {
-        return null;
+    public AuthsomeUserToFetch getAuthsomeUser(String id, String username) throws BadRequestException {
+        log.info("getAuthsomeUser({}, {})", id, username);
+        if (!StringUtils.hasText(id) && !StringUtils.hasText(username)) {
+            throw new BadRequestException("Both ID and Username can't be null!");
+        }
+        var filter = Example.of(
+                new AuthsomeUserEntity(id, username, null, null, null)
+        );
+        var user = userJpaRepo.findOne(filter).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        return new AuthsomeUserToFetch(user.id, user.username);
     }
 
     /**
@@ -165,6 +208,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
      * @param username the username to validate
      * @throws AuthsomeUsernameAlreadyInUse if the username already exists
      */
+    @SubBlock
     private void validateUsernameAvailability(String username) throws AuthsomeUsernameAlreadyInUse {
         var filter = Example.of(new AuthsomeUserEntity(null, username, null, null, null));
         if (userJpaRepo.exists(filter)) {
@@ -180,6 +224,7 @@ public class AuthsomeServiceImpl implements AuthsomeService {
      * @param identity     the identity value to validate
      * @throws AuthsomeIdentityAlreadyInUse if the identity already exists
      */
+    @SubBlock
     private void validateIdentityAvailability(IdentityType identityType, String identity) throws AuthsomeIdentityAlreadyInUse {
         var identityFilter = Example.of(new AuthsomeUserIdentityEntity(null, null, identityType, identity, null, null));
         if (identityJpaRepo.exists(identityFilter)) {
