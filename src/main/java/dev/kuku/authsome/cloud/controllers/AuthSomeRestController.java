@@ -49,7 +49,7 @@ public class AuthSomeRestController {
 
     //3. Endpoint to sign in and get back jwt tokens
     @PostMapping("/signin")
-    public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) throws AuthsomeUserWithIdentityNotFound {
+    public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) throws AuthsomeUserWithIdentityNotFound, MaxActiveSessionsReached, AuthsomePasswordMismatch {
         log.trace("signin {}", body);
         SignInTokens tokens = authsomeService.signIn(body.identityType, body.identity, body.password);
         return new ResponseModel<>(tokens, null);
