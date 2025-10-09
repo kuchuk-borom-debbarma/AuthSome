@@ -1,4 +1,4 @@
-package dev.kuku.authsome.cloud.controllers;
+package dev.kuku.authsome.cloud.rest_controller;
 
 import dev.kuku.authsome.cloud.models.ResponseModel;
 import dev.kuku.authsome.cloud.models.SignInRequest;
@@ -9,6 +9,7 @@ import dev.kuku.authsome.core_service.authsome.api.dto.SignInTokens;
 import dev.kuku.authsome.core_service.authsome.api.exceptions.*;
 import dev.kuku.authsome.util_service.jwt.api.exception.ExpiredJwtToken;
 import dev.kuku.authsome.util_service.jwt.api.exception.InvalidJwtToken;
+import dev.kuku.vfl.api.annotation.RootBlock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class AuthSomeRestController {
+public class AuthSomeUserController {
     private final AuthsomeService authsomeService;
 
     //1. Endpoint to signup with username, identity, password. Should send OTP to identity
     @PostMapping("/signup-start")
+    @RootBlock
     public ResponseModel<String> startSignup(@RequestBody SignupStartRequest body) throws AuthsomeUsernameAlreadyInUse, AuthsomeIdentityAlreadyInUse, InvalidOtpTypeException {
         log.trace("signup-start {}", body);
         /*
@@ -36,6 +38,7 @@ public class AuthSomeRestController {
 
     //2. Endpoint to complete signup with code
     @PostMapping("/signup-verify")
+    @RootBlock
     public ResponseModel<Void> verifySignup(@RequestHeader("X-Verification-Token") String token, @RequestBody VerifySignupRequest body) throws InvalidJwtToken, AuthsomeUsernameAlreadyInUse, OtpMismatchException, AuthsomeIdentityAlreadyInUse, ExpiredJwtToken, OtpNotFoundInDatabase {
         log.trace("verifySignup");
         /*
@@ -49,6 +52,7 @@ public class AuthSomeRestController {
 
     //3. Endpoint to sign in and get back jwt tokens
     @PostMapping("/signin")
+    @RootBlock
     public ResponseModel<SignInTokens> signIn(@RequestBody SignInRequest body) throws AuthsomeUserWithIdentityNotFound, MaxActiveSessionsReached, AuthsomePasswordMismatch {
         log.trace("signin {}", body);
         SignInTokens tokens = authsomeService.signIn(body.identityType, body.identity, body.password);

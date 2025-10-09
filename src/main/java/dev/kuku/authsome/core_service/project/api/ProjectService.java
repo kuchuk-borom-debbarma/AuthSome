@@ -1,10 +1,11 @@
 package dev.kuku.authsome.core_service.project.api;
 
-import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityType;
 import dev.kuku.authsome.core_service.project.api.dto.ProjectToFetch;
-import dev.kuku.authsome.core_service.project.api.dto.ProjectUserToAdd;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityToFetch;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserIdentityType;
+import dev.kuku.authsome.core_service.project.api.dto.ProjectUserToFetch;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
  * Project service that is responsible for handling all project related operations.
@@ -12,104 +13,17 @@ import java.util.List;
  * projects are isolated environments for authsome authsome_user to manage their own users and configurations at project level.
  */
 public interface ProjectService {
-    /**
-     * Create a project for an authsome authsome_user.
-     *
-     * @param authsomeUserId    id of the authsome authsome_user
-     * @param uniqueProjectName unique name of the project
-     */
-    void createProject(String authsomeUserId, String uniqueProjectName);
 
-    /**
-     * Add users to a project.
-     *
-     * @param projectId        id of the project.
-     * @param projectUsernames list of usernames to be added to the project.
-     */
-    void addUsersToProject(String projectId, List<ProjectUserToAdd> projectUsernames);
 
-    /**
-     * Add (update if exists) password of a authsome_user without any verification.
-     *
-     * @param projectId
-     * @param projectUsername
-     * @param password
-     */
-    void upsertPasswordForProjectUser(String projectId, String projectUsername, String password);
+    ProjectToFetch createProject(String authsomeUserId, String projectName, String description);
 
-    /**
-     * Update the password of a authsome_user if current password matches
-     *
-     * @param projectId       id of the project.
-     * @param projectUsername username of the project's authsome_user.
-     * @param currentPassword current password of the authsome_user (can be null. If null then will directly set the new password)
-     * @param newPassword     new password of the project authsome_user.
-     */
-    void updatePasswordForProjectUser(String projectId, String projectUsername, String currentPassword, String newPassword);
+    ProjectToFetch updateProject(String authsomeUserId, String projectId, String name, String description);
 
-    /**
-     * Start update password process
-     *
-     * @param projectId
-     * @param projectUsername
-     * @param projectUserIdentityType
-     * @param identity
-     * @return token that must be sent along with the OTP during verification process.
-     */
-    String updatePasswordWithIdentityOtp(String projectId, String projectUsername, ProjectUserIdentityType projectUserIdentityType, String identity);
+    ProjectUserToFetch createUserForProject(String s, String projectId, String username, Optional<String> password);
 
-    /**
-     * Verify the OTP and set new password for the given project authsome_user.
-     *
-     * @param projectId
-     * @param projectUsername
-     * @param token
-     * @param otp
-     * @param newPassword
-     */
-    void verifyUpdatePasswordWithidentityOtp(String projectId, String projectUsername, String token, String otp, String newPassword);
+    ProjectUserToFetch updatePassword(String authsomeUserId, String projectId, String userId, String updatedPassword);
 
-    /**
-     * Add identity for a authsome_user in a project.
-     *
-     * @param projectId        id of the project.
-     * @param projectUsername  username of the authsome_user in the project.
-     * @param identityProvider identity provider type.
-     * @param identity         identity value from the identity provider.
-     * @param isVerified       if true the identity will be persisted as verified and will not require further verification.
-     */
-    void addIdentityForUser(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, boolean isVerified);
+    ProjectUserIdentityToFetch addIdentitiesForUsers(String authsomeUserId, String projectId, String userId, ProjectUserIdentityType identityType, String identity, boolean verified);
 
-    /**
-     * Start identity verification process for a authsome_user in a project using OTP as verification method.
-     *
-     * @param projectId        id of the project.
-     * @param projectUsername  username of the authsome_user in the project.
-     * @param identityProvider identity provider type.
-     * @param identity         identity value from the identity provider.
-     * @return token that must be passed during verification of the identity.
-     */
-    String startidentityVerificationWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity);
-
-    /**
-     * Verify identity for a authsome_user in a project using OTP as verification method. Will throw except if something went wrong.
-     *
-     * @param projectId        id of the project.
-     * @param projectUsername  username of the authsome_user in the project.
-     * @param identityProvider identity provider type.
-     * @param identity         identity value from the identity provider.
-     * @param otp              one time password sent to the identity.
-     * @param token            token received when starting the identity verification process.
-     */
-    void verifyIdentityWithOtp(String projectId, String projectUsername, ProjectUserIdentityType identityProvider, String identity, String otp, String token);
-
-    /**
-     * Get all the projects of a user
-     *
-     * @return
-     */
-    List<ProjectToFetch> getProjectOfUser(String userId, String cursor, int limit);
-
-    //TODO Get based methods not defined yet. Will do as per requirements later down the line
-
+    ProjectUserIdentityToFetch setIdentityVerified(String authsomeUserId, String projectId, String projectUserId, ProjectUserIdentityType identityType, String identity, boolean verified);
 }

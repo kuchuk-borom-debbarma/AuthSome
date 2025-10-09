@@ -15,50 +15,50 @@ Authsome supports a two-tier configuration hierarchy:
 
 ### Session & Token Management
 
-| Setting | Description | Default | Configurable At |
-|---------|-------------|---------|-----------------|
-| Max concurrent sessions | Maximum number of active sessions per user | 3 | Project, Role |
-| Access token expiry | Duration before access token expires (seconds) | 900 (15 min) | Project, Role |
-| Refresh token expiry | Duration before refresh token expires (seconds) | 604800 (7 days) | Project, Role |
-| Refresh token rotation | Whether to rotate refresh tokens on use | Yes | Project, Role |
-| Session timeout | Automatic logout after inactivity (seconds) | 1800 (30 min) | Project, Role |
+| Setting                 | Description                                     | Default         | Configurable At |
+|-------------------------|-------------------------------------------------|-----------------|-----------------|
+| Max concurrent sessions | Maximum number of active sessions per user      | 3               | Project, Role   |
+| Access token expiry     | Duration before access token expires (seconds)  | 900 (15 min)    | Project, Role   |
+| Refresh token expiry    | Duration before refresh token expires (seconds) | 604800 (7 days) | Project, Role   |
+| Refresh token rotation  | Whether to rotate refresh tokens on use         | Yes             | Project, Role   |
+| Session timeout         | Automatic logout after inactivity (seconds)     | 1800 (30 min)   | Project, Role   |
 
 ---
 
 ### Password Policies
 
-| Setting | Description | Default | Configurable At |
-|---------|-------------|---------|-----------------|
-| Minimum password length | Minimum characters required | 8 | Project, Role |
-| Require uppercase | Must contain uppercase letter | No | Project, Role |
-| Require number | Must contain at least one number | No | Project, Role |
-| Require special character | Must contain special character | No | Project, Role |
-| Max failed login attempts | Login attempts before account lockout | 5 | Project, Role |
-| Lockout duration | How long account stays locked (minutes) | 15 | Project, Role |
-| Password reset link expiry | Time before reset link expires (minutes) | 60 | Project |
+| Setting                    | Description                              | Default | Configurable At |
+|----------------------------|------------------------------------------|---------|-----------------|
+| Minimum password length    | Minimum characters required              | 8       | Project, Role   |
+| Require uppercase          | Must contain uppercase letter            | No      | Project, Role   |
+| Require number             | Must contain at least one number         | No      | Project, Role   |
+| Require special character  | Must contain special character           | No      | Project, Role   |
+| Max failed login attempts  | Login attempts before account lockout    | 5       | Project, Role   |
+| Lockout duration           | How long account stays locked (minutes)  | 15      | Project, Role   |
+| Password reset link expiry | Time before reset link expires (minutes) | 60      | Project         |
 
 ---
 
 ### Registration & User Management
 
-| Setting | Description | Default | Configurable At |
-|---------|-------------|---------|-----------------|
-| Email verification required | New users must verify email | Yes | Project |
-| Auto-approve registrations | Automatically approve new users | Yes | Project |
-| Allowed email domains | Whitelist of allowed email domains | Empty (all allowed) | Project |
-| Blocked email domains | Blacklist of blocked email domains | Empty | Project |
-| Block disposable emails | Reject temporary/disposable email addresses | No | Project |
+| Setting                     | Description                                 | Default             | Configurable At |
+|-----------------------------|---------------------------------------------|---------------------|-----------------|
+| Email verification required | New users must verify email                 | Yes                 | Project         |
+| Auto-approve registrations  | Automatically approve new users             | Yes                 | Project         |
+| Allowed email domains       | Whitelist of allowed email domains          | Empty (all allowed) | Project         |
+| Blocked email domains       | Blacklist of blocked email domains          | Empty               | Project         |
+| Block disposable emails     | Reject temporary/disposable email addresses | No                  | Project         |
 
 ---
 
 ### Security & Rate Limiting
 
-| Setting | Description | Default | Configurable At |
-|---------|-------------|---------|-----------------|
-| Max login attempts (IP) | Login attempts per IP per hour | 10 | Project |
-| Max registration attempts (IP) | Registration attempts per IP per hour | 3 | Project |
-| Max password reset requests | Password reset requests per user per hour | 3 | Project |
-| Allowed CORS origins | List of allowed origins for CORS | Empty (none) | Project |
+| Setting                        | Description                               | Default      | Configurable At |
+|--------------------------------|-------------------------------------------|--------------|-----------------|
+| Max login attempts (IP)        | Login attempts per IP per hour            | 10           | Project         |
+| Max registration attempts (IP) | Registration attempts per IP per hour     | 3            | Project         |
+| Max password reset requests    | Password reset requests per user per hour | 3            | Project         |
+| Allowed CORS origins           | List of allowed origins for CORS          | Empty (none) | Project         |
 
 ---
 

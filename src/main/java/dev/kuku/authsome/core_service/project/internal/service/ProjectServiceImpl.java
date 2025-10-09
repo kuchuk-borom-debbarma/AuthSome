@@ -37,7 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void verifyUpdatePasswordWithidentityOtp(String projectId, String projectUsername, String token, String otp, String newPassword) {
+    public void verifyUpdatePasswordWithIdentityOtp(String projectId, String projectUsername, String token, String otp, String newPassword) {
 
     }
 
