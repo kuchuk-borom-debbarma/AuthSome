@@ -1,4 +1,4 @@
-package dev.kuku.authsome.cloud.rest_controller;
+package dev.kuku.authsome.cloud.rest_controller.project;
 
 import dev.kuku.authsome.cloud.models.ResponseModel;
 import dev.kuku.authsome.cloud.models.project.CreateProjectRequest;

@@ -10,4 +10,5 @@ public class AddIdentityForUserRequest {
     public ProjectUserIdentityType identityType;
     public String identity;
     public boolean verified;
+    public boolean isPrimary;
 }

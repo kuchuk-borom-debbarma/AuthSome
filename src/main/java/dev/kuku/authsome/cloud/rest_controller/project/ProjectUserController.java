@@ -1,4 +1,4 @@
-package dev.kuku.authsome.cloud.rest_controller;
+package dev.kuku.authsome.cloud.rest_controller.project;
 
 import dev.kuku.authsome.cloud.models.ResponseModel;
 import dev.kuku.authsome.cloud.models.project.AddIdentityForUserRequest;
@@ -44,7 +44,13 @@ public class ProjectUserController extends ProjectController {
     @RootBlock
     public ResponseModel<ProjectUserIdentityToFetch> addIdentityForUser(AddIdentityForUserRequest body) {
         log.info("addIdentityForUser {}", body);
-        var created = projectService.addIdentitiesForUsers(currentUser(), body.projectId, body.userId, body.identityType, body.identity, body.verified);
+        var created = projectService.addIdentitiesForUsers(currentUser(),
+                body.projectId,
+                body.userId,
+                body.identityType,
+                body.identity,
+                body.verified,
+                body.isPrimary);
         return new ResponseModel<>(created, null);
     }
 

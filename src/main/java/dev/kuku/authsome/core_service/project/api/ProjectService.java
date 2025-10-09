@@ -19,11 +19,12 @@ public interface ProjectService {
 
     ProjectToFetch updateProject(String authsomeUserId, String projectId, String name, String description);
 
-    ProjectUserToFetch createUserForProject(String s, String projectId, String username, Optional<String> password);
+    ProjectUserToFetch createUserForProject(String authsomeUserId, String projectId, String username, Optional<String> password);
 
     ProjectUserToFetch updatePassword(String authsomeUserId, String projectId, String userId, String updatedPassword);
 
-    ProjectUserIdentityToFetch addIdentitiesForUsers(String authsomeUserId, String projectId, String userId, ProjectUserIdentityType identityType, String identity, boolean verified);
+    ProjectUserIdentityToFetch addIdentitiesForUsers(String authsomeUserId, String projectId, String userId, ProjectUserIdentityType identityType, String identity, boolean verified, boolean isPrimary);
 
     ProjectUserIdentityToFetch setIdentityVerified(String authsomeUserId, String projectId, String projectUserId, ProjectUserIdentityType identityType, String identity, boolean verified);
+    ProjectUserIdentityToFetch setIdentityPrimary(String authsomeUserId, String projectId, String projectUserId, ProjectUserIdentityType identityType, String identity, boolean isPrimary);
 }
